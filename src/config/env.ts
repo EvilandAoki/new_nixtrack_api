@@ -16,4 +16,5 @@ export const env = {
     secret: process.env.JWT_SECRET || 'default_secret_change_me',
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
   },
+  uploadPath: process.env.UPLOAD_PATH || 'uploads/',
 };

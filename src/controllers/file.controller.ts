@@ -15,7 +15,7 @@ export class FileController {
       }
 
       const { description, is_main_photo } = req.body;
-      const isMainPhoto = is_main_photo === 'true' || is_main_photo === true;
+      const isMainPhoto = is_main_photo === 'true' || is_main_photo === true || is_main_photo === '1' || is_main_photo === 1;
 
       const file = await FileService.createVehicleFile(
         vehicleId,
