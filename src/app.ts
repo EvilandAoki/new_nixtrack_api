@@ -11,7 +11,9 @@ const app = express();
 app.use(helmet({
     crossOriginResourcePolicy: false,
 }));
-app.use(cors());
+app.use(cors({
+  origin: env.corsOrigin === '*' ? true : env.corsOrigin.split(','),
+}));
 app.use(express.json());
 
 // Serve uploaded files statically

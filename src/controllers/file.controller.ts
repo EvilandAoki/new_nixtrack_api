@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { FileService } from '../services/file.service';
 import { AuthRequest } from '../types';
 import { sendSuccess, sendError } from '../utils/response';
+import { env } from '../config/env';
 
 export class FileController {
   // Vehicle Files
@@ -21,7 +22,7 @@ export class FileController {
         vehicleId,
         {
           filename: req.file.filename,
-          path: `/uploads/${req.file.filename}`,
+          path: `/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -89,7 +90,7 @@ export class FileController {
         orderId,
         {
           filename: req.file.filename,
-          path: `/uploads/${req.file.filename}`,
+          path: `/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -141,7 +142,7 @@ export class FileController {
         detailId,
         {
           filename: req.file.filename,
-          path: `/uploads/${req.file.filename}`,
+          path: `/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
