@@ -23,12 +23,12 @@ export class ClientModel {
     const conditions: string[] = [];
 
     if (is_active !== undefined) {
-      conditions.push('is_active = ?');
+      conditions.push('sc.is_active = ?');
       params.push(is_active ? 1 : 0);
     }
 
     if (search) {
-      conditions.push('(company_name LIKE ? OR tax_id LIKE ?)');
+      conditions.push('(sc.company_name LIKE ? OR sc.tax_id LIKE ?)');
       params.push(`%${search}%`, `%${search}%`);
     }
 
@@ -36,17 +36,18 @@ export class ClientModel {
 
     // Get total count
     const [countResult] = await pool.query<RowDataPacket[]>(
-      `SELECT COUNT(*) as total FROM sys_clients ${whereClause}`,
+      `SELECT COUNT(*) as total FROM sys_clients sc ${whereClause}`,
       params
     );
     const total = countResult[0].total;
 
     // Get paginated data
     const query = `
-      SELECT ${this.SELECT_FIELDS}
-      FROM sys_clients
+      SELECT sc.*, c.name as city_name, c.department_code
+      FROM sys_clients sc
+      LEFT JOIN sys_cities c ON sc.city_id = c.city_id
       ${whereClause}
-      ORDER BY company_name
+      ORDER BY sc.company_name
       LIMIT ? OFFSET ?
     `;
 
@@ -57,7 +58,7 @@ export class ClientModel {
 
   static async findById(id: number): Promise<Client | null> {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE id_client = ?`,
+      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE id_client = ? `,
       [id]
     );
     return rows.length > 0 ? (rows[0] as Client) : null;
@@ -65,7 +66,7 @@ export class ClientModel {
 
   static async findByTaxId(taxId: string): Promise<Client | null> {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE tax_id = ?`,
+      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE tax_id = ? `,
       [taxId]
     );
     return rows.length > 0 ? (rows[0] as Client) : null;
@@ -73,7 +74,7 @@ export class ClientModel {
 
   static async findByTaxIdIncludeInactive(taxId: string): Promise<Client | null> {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE tax_id = ?`,
+      `SELECT ${this.SELECT_FIELDS} FROM sys_clients WHERE tax_id = ? `,
       [taxId]
     );
     return rows.length > 0 ? (rows[0] as Client) : null;
@@ -82,8 +83,8 @@ export class ClientModel {
   static async create(data: CreateClientDto, createdBy?: number): Promise<Client> {
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO sys_clients
-        (company_name, tax_id, phone, address, email, country_id, city_id, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (company_name, tax_id, phone, address, email, country_id, city_id, created_by)
+    VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.company_name,
         data.tax_id,
@@ -146,7 +147,7 @@ export class ClientModel {
 
     values.push(id);
     await pool.query<ResultSetHeader>(
-      `UPDATE sys_clients SET ${fields.join(', ')} WHERE id_client = ?`,
+      `UPDATE sys_clients SET ${fields.join(', ')} WHERE id_client = ? `,
       values
     );
 
@@ -156,7 +157,7 @@ export class ClientModel {
   static async delete(id: number, deletedBy?: number): Promise<boolean> {
     // Soft delete by setting is_active = 0
     const [result] = await pool.query<ResultSetHeader>(
-      `UPDATE sys_clients SET is_active = 0, updated_by = ? WHERE id_client = ?`,
+      `UPDATE sys_clients SET is_active = 0, updated_by = ? WHERE id_client = ? `,
       [deletedBy || null, id]
     );
     return result.affectedRows > 0;
