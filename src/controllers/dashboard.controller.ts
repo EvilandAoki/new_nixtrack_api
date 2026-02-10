@@ -43,11 +43,12 @@ export class DashboardController {
           c.company_name as client_name,
           o.vehicle_id,
           v.license_plate as vehicle_plate,
+          v.brand as vehicle_brand,
           o.order_number,
           o.manifest_number,
           o.origin_city_code,
-          oc.name as origin_city_name,
           o.destination_city_code,
+          oc.name as origin_city_name,
           dc.name as destination_city_name,
           o.status_id,
           s.name as status_name,
@@ -87,21 +88,19 @@ export class DashboardController {
       const [rows] = await pool.query<RowDataPacket[]>(query, [clientId, clientId]);
 
       // Format the response
-      const dashboardItems = (rows as DashboardOrder[]).map(row => ({
-        order: {
-          id: row.id,
-          client_id: row.client_id,
-          vehicle_id: row.vehicle_id,
-          order_number: row.order_number,
-          manifest_number: row.manifest_number,
-          origin_city_code: row.origin_city_code,
-          destination_city_code: row.destination_city_code,
-          status_id: row.status_id,
-          status_level: row.status_level,
-          departure_at: row.departure_at,
-          driver_name: row.driver_name,
-          driver_mobile: row.driver_mobile,
-        },
+      const dashboardItems = (rows as any[]).map(row => ({
+        id: row.id,
+        client_id: row.client_id,
+        vehicle_id: row.vehicle_id,
+        order_number: row.order_number,
+        manifest_number: row.manifest_number,
+        origin_city_code: row.origin_city_code,
+        destination_city_code: row.destination_city_code,
+        status_id: row.status_id,
+        status_level: row.status_level,
+        departure_at: row.departure_at,
+        driver_name: row.driver_name,
+        driver_mobile: row.driver_mobile,
         client: {
           id_client: row.client_id,
           company_name: row.client_name,
@@ -109,6 +108,7 @@ export class DashboardController {
         vehicle: row.vehicle_id ? {
           id: row.vehicle_id,
           license_plate: row.vehicle_plate,
+          brand: row.vehicle_brand,
         } : null,
         origin_city: row.origin_city_code ? {
           code: row.origin_city_code,
