@@ -1,9 +1,19 @@
 import { pool } from '../config/database';
-import { VehicleFile, OrderFile, OrderDetailFile } from '../types';
+import { VehicleFile, OrderFile, OrderDetailFile, AgentFile } from '../types';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export interface CreateVehicleFileData {
   vehicle_id: number;
+  file_name: string;
+  description?: string;
+  file_url: string;
+  mime_type?: string;
+  is_main_photo?: boolean;
+  created_by?: number;
+}
+
+export interface CreateAgentFileData {
+  agent_id: number;
   file_name: string;
   description?: string;
   file_url: string;
@@ -160,5 +170,58 @@ export class FileModel {
       [id]
     );
     return result.affectedRows > 0;
+  }
+
+  // Agent Files
+  static async createAgentFile(data: CreateAgentFileData): Promise<AgentFile> {
+    const [result] = await pool.query<ResultSetHeader>(
+      `INSERT INTO track_agent_files
+        (agent_id, file_name, description, file_url, mime_type, is_main_photo, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        data.agent_id,
+        data.file_name,
+        data.description || null,
+        data.file_url,
+        data.mime_type || null,
+        data.is_main_photo ? 1 : 0,
+        data.created_by || null,
+      ]
+    );
+
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM track_agent_files WHERE id = ?`,
+      [result.insertId]
+    );
+    return rows[0] as AgentFile;
+  }
+
+  static async findAgentFileById(id: number): Promise<AgentFile | null> {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT * FROM track_agent_files WHERE id = ?`,
+      [id]
+    );
+    return rows.length > 0 ? (rows[0] as AgentFile) : null;
+  }
+
+  static async deleteAgentFile(id: number): Promise<boolean> {
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE track_agent_files SET is_deleted = 1 WHERE id = ?`,
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  static async setMainAgentPhoto(agentId: number, fileId: number): Promise<void> {
+    // First, unset all main photos for this agent
+    await pool.query(
+      `UPDATE track_agent_files SET is_main_photo = 0 WHERE agent_id = ?`,
+      [agentId]
+    );
+    // Then set the new main photo
+    await pool.query(
+      `UPDATE track_agent_files SET is_main_photo = 1 WHERE id = ? AND agent_id = ?`,
+      [fileId, agentId]
+    );
   }
 }

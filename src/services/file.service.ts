@@ -1,8 +1,9 @@
 import { FileModel } from '../models/file.model';
 import { VehicleModel } from '../models/vehicle.model';
+import { AgentModel } from '../models/agent.model';
 import { OrderModel } from '../models/order.model';
 import { OrderDetailModel } from '../models/orderDetail.model';
-import { VehicleFile, OrderFile, OrderDetailFile, UserPayload } from '../types';
+import { VehicleFile, OrderFile, OrderDetailFile, AgentFile, UserPayload } from '../types';
 
 export class FileService {
   // Vehicle Files
@@ -216,5 +217,86 @@ export class FileService {
     }
 
     return FileModel.deleteOrderDetailFile(fileId);
+  }
+
+  // Agent Files
+  static async createAgentFile(
+    agentId: number,
+    file: { filename: string; path: string; mimetype: string },
+    description: string | undefined,
+    isMainPhoto: boolean,
+    currentUser?: UserPayload
+  ): Promise<AgentFile> {
+    const agent = await AgentModel.findById(agentId);
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+
+    // Non-admin users can only upload files to their own client's agents
+    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+      if (agent.client_id && agent.client_id !== currentUser.client_id) {
+        throw new Error('Access denied');
+      }
+    }
+
+    return FileModel.createAgentFile({
+      agent_id: agentId,
+      file_name: file.filename,
+      file_url: file.path,
+      mime_type: file.mimetype,
+      description,
+      is_main_photo: isMainPhoto,
+      created_by: currentUser?.id,
+    });
+  }
+
+  static async deleteAgentFile(agentId: number, fileId: number, currentUser?: UserPayload): Promise<boolean> {
+    const agent = await AgentModel.findById(agentId);
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+
+    // Non-admin users can only delete files from their own client's agents
+    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+      if (agent.client_id && agent.client_id !== currentUser.client_id) {
+        throw new Error('Access denied');
+      }
+    }
+
+    const file = await FileModel.findAgentFileById(fileId);
+    if (!file) {
+      throw new Error('File not found');
+    }
+
+    if (file.agent_id !== agentId) {
+      throw new Error('File not found');
+    }
+
+    return FileModel.deleteAgentFile(fileId);
+  }
+
+  static async setMainAgentPhoto(agentId: number, fileId: number, currentUser?: UserPayload): Promise<void> {
+    const agent = await AgentModel.findById(agentId);
+    if (!agent) {
+      throw new Error('Agent not found');
+    }
+
+    // Non-admin users can only update files for their own client's agents
+    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+      if (agent.client_id && agent.client_id !== currentUser.client_id) {
+        throw new Error('Access denied');
+      }
+    }
+
+    const file = await FileModel.findAgentFileById(fileId);
+    if (!file) {
+      throw new Error('File not found');
+    }
+
+    if (file.agent_id !== agentId) {
+      throw new Error('File not found');
+    }
+
+    return FileModel.setMainAgentPhoto(agentId, fileId);
   }
 }

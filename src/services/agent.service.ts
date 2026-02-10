@@ -27,6 +27,12 @@ export class AgentService {
     return agent;
   }
 
+  static async getWithFiles(id: number, currentUser?: UserPayload) {
+    const agent = await this.findById(id, currentUser);
+    const files = await AgentModel.getFiles(id);
+    return { ...agent, files };
+  }
+
   static async create(data: CreateAgentDto, currentUser?: UserPayload): Promise<Agent> {
     // Validate document_id uniqueness if provided
     if (data.document_id) {
