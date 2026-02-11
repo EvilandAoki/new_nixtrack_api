@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { AgentController } from '../controllers/agent.controller';
+import { FileController } from '../controllers/file.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { validate } from '../middlewares/validate.middleware';
+import { upload } from '../middlewares/upload.middleware';
 
 const router = Router();
 
@@ -40,5 +42,10 @@ router.put(
 
 // Soft delete agent
 router.delete('/:id', AgentController.delete);
+
+// Agent file routes
+router.post('/:id/files', upload.single('file'), FileController.uploadAgentFile);
+router.delete('/:id/files/:fileId', FileController.deleteAgentFile);
+router.put('/:id/files/:fileId/main', FileController.setMainAgentPhoto);
 
 export default router;

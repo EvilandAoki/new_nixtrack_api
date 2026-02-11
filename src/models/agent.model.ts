@@ -1,5 +1,5 @@
 import { pool } from '../config/database';
-import { Agent, AgentWithVehicle, CreateAgentDto, UpdateAgentDto } from '../types';
+import { Agent, AgentWithVehicle, AgentFile, CreateAgentDto, UpdateAgentDto } from '../types';
 import { ResultSetHeader, RowDataPacket } from 'mysql2';
 
 export interface AgentFilters {
@@ -163,5 +163,16 @@ export class AgentModel {
       [deletedBy || null, id]
     );
     return result.affectedRows > 0;
+  }
+
+  static async getFiles(agentId: number): Promise<AgentFile[]> {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT id, agent_id, file_name, description, file_url, mime_type, is_main_photo, created_by, created_at, is_deleted
+       FROM track_agent_files
+       WHERE agent_id = ? AND is_deleted = 0
+       ORDER BY is_main_photo DESC, created_at DESC`,
+      [agentId]
+    );
+    return rows as AgentFile[];
   }
 }
