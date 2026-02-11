@@ -22,7 +22,7 @@ export class FileController {
         vehicleId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -90,7 +90,7 @@ export class FileController {
         orderId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -142,7 +142,7 @@ export class FileController {
         detailId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -196,7 +196,7 @@ export class FileController {
         agentId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,

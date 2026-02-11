@@ -17,5 +17,6 @@ export const env = {
     expiresIn: process.env.JWT_EXPIRES_IN || '1d',
   },
   uploadPath: process.env.UPLOAD_PATH || 'uploads/',
+  uploadUrl: process.env.UPLOAD_URL || '',
   corsOrigin: process.env.CORS_ORIGIN || '*',
 };
