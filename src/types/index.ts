@@ -291,7 +291,7 @@ export interface CreateOrderDto {
 }
 
 // DTO for updating an order
-export interface UpdateOrderDto extends Partial<Omit<CreateOrderDto, 'client_id' | 'order_number'>> {
+export interface UpdateOrderDto extends Partial<CreateOrderDto> {
   status_level?: string;
 }
 

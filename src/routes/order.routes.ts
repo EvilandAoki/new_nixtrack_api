@@ -46,6 +46,8 @@ router.post(
 router.put(
   '/:id',
   validate({
+    client_id: { required: false, type: 'number' },
+    order_number: { required: false, type: 'string' },
     vehicle_id: { required: false, type: 'number' },
     manifest_number: { required: false, type: 'string' },
     insurance_company: { required: false, type: 'string' },

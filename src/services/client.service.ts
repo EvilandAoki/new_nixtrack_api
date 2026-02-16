@@ -4,7 +4,8 @@ import { CreateClientDto, UpdateClientDto, UserPayload, Client } from '../types'
 export class ClientService {
   static async findAll(filters: ClientFilters, currentUser?: UserPayload) {
     // Non-admin users can only see their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       const client = await ClientModel.findById(currentUser.client_id);
       return {
         data: client ? [client] : [],
@@ -16,7 +17,8 @@ export class ClientService {
 
   static async findById(id: number, currentUser?: UserPayload): Promise<Client> {
     // Non-admin users can only see their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (id !== currentUser.client_id) {
         throw new Error('Access denied');
       }

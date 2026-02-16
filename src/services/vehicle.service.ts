@@ -4,7 +4,8 @@ import { CreateVehicleDto, UpdateVehicleDto, UserPayload, Vehicle, VehicleWithCl
 export class VehicleService {
   static async findAll(filters: VehicleFilters, currentUser?: UserPayload) {
     // Non-admin users can only see vehicles from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       filters.client_id = currentUser.client_id;
     }
     return VehicleModel.findAll(filters);
@@ -17,7 +18,8 @@ export class VehicleService {
     }
 
     // Non-admin users can only see vehicles from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (vehicle.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -40,7 +42,8 @@ export class VehicleService {
 
   static async create(data: CreateVehicleDto, currentUser?: UserPayload): Promise<Vehicle> {
     // Non-admin users can only create vehicles for their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (data.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -62,7 +65,8 @@ export class VehicleService {
     }
 
     // Non-admin users can only update vehicles from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (vehicle.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -82,7 +86,8 @@ export class VehicleService {
     }
 
     // Non-admin users can only delete vehicles from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (vehicle.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }

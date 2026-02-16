@@ -79,7 +79,9 @@ export class OrderModel {
 
     // Get total count
     const [countResult] = await pool.query<RowDataPacket[]>(
-      `SELECT COUNT(*) as total FROM track_order o ${whereClause}`,
+      `SELECT COUNT(*) as total FROM track_order o 
+       LEFT JOIN track_vehicles v ON o.vehicle_id = v.id 
+       ${whereClause}`,
       params
     );
     const total = countResult[0].total;
@@ -219,6 +221,14 @@ export class OrderModel {
     const fields: string[] = [];
     const values: (string | number | boolean | null)[] = [];
 
+    if (data.client_id !== undefined) {
+      fields.push('client_id = ?');
+      values.push(data.client_id || null);
+    }
+    if (data.order_number !== undefined) {
+      fields.push('order_number = ?');
+      values.push(data.order_number);
+    }
     if (data.vehicle_id !== undefined) {
       fields.push('vehicle_id = ?');
       values.push(data.vehicle_id || null);

@@ -28,7 +28,8 @@ const VALID_TRANSITIONS: Record<number, number[]> = {
 export class OrderService {
   static async findAll(filters: OrderFilters, currentUser?: UserPayload) {
     // Non-admin users can only see orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       filters.client_id = currentUser.client_id;
     }
     return OrderModel.findAll(filters);
@@ -41,7 +42,8 @@ export class OrderService {
     }
 
     // Non-admin users can only see orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (order.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -59,7 +61,8 @@ export class OrderService {
 
   static async create(data: CreateOrderDto, currentUser?: UserPayload): Promise<Order> {
     // Non-admin users can only create orders for their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (data.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -84,14 +87,18 @@ export class OrderService {
     }
 
     // Non-admin users can only update orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (order.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
     }
 
-    // Cannot modify finalized or cancelled orders
-    if (order.status_id === STATUS.ENTREGADO || order.status_id === STATUS.CANCELADO) {
+    // Cannot modify finalized or cancelled orders (UNLESS Admin or Operator)
+    const isRestricted = order.status_id === STATUS.ENTREGADO || order.status_id === STATUS.CANCELADO;
+    const canBypass = currentUser && (currentUser.is_admin || [2, 3, '2', '3'].includes(currentUser.role_id as any));
+
+    if (isRestricted && !canBypass) {
       throw new Error('Cannot modify finalized or cancelled orders');
     }
 
@@ -109,7 +116,8 @@ export class OrderService {
     }
 
     // Non-admin users can only update orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (order.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }
@@ -137,7 +145,8 @@ export class OrderService {
     }
 
     // Non-admin users can only delete orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (order.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }

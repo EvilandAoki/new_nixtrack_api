@@ -20,7 +20,7 @@ export function validate(schema: ValidationSchema) {
         continue;
       }
 
-      if (value !== undefined && value !== '') {
+      if (value !== undefined && value !== '' && value !== null) {
         if (rules.type === 'email') {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(value)) {

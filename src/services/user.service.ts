@@ -16,16 +16,34 @@ export interface CreateUserDto {
 
 export class UserService {
   static async findAll(currentUser?: UserPayload) {
-    // If user is not admin, only show users from their client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
-      return UserModel.findAll(currentUser.client_id);
+    // If user is not admin
+    if (currentUser && !currentUser.is_admin) {
+      // Strictly deny Operators (role_id=3)
+      if (currentUser.role_id === 3) {
+        throw new Error('Access denied');
+      }
+      // If they have a client_id, show only their users
+      if (currentUser.client_id) {
+        return UserModel.findAll(currentUser.client_id);
+      }
+      // If they are not admin and don't have client_id, they CANNOT see users
+      throw new Error('Access denied');
     }
     return UserModel.findAll();
   }
 
   static async findAllPaginated(currentUser: UserPayload | undefined, page: number, limit: number, search: string) {
-    const clientId = (currentUser && !currentUser.is_admin && currentUser.client_id) ? currentUser.client_id : undefined;
-    return UserModel.findPaginated(page, limit, search, clientId);
+    if (currentUser && !currentUser.is_admin) {
+      // Strictly deny Operators (role_id=3)
+      if (currentUser.role_id === 3) {
+        throw new Error('Access denied');
+      }
+      if (currentUser.client_id) {
+        return UserModel.findPaginated(page, limit, search, currentUser.client_id);
+      }
+      throw new Error('Access denied');
+    }
+    return UserModel.findPaginated(page, limit, search, undefined);
   }
 
   static async findById(id: number) {

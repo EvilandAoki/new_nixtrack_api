@@ -16,7 +16,8 @@ export class OrderDetailService {
     }
 
     // Non-admin users can only access orders from their own client
-    if (currentUser && !currentUser.is_admin && currentUser.client_id) {
+    // EXCEPTION: Supervisors (2) & Operators (3) or users without client_id (internal staff)
+    if (currentUser && !currentUser.is_admin && currentUser.client_id && ![2, 3, '2', '3'].includes(currentUser.role_id as any)) {
       if (order.client_id !== currentUser.client_id) {
         throw new Error('Access denied');
       }

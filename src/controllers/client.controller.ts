@@ -42,8 +42,10 @@ export class ClientController {
   static async create(req: AuthRequest, res: Response): Promise<void> {
     try {
       // Only admin can create clients
-      if (!req.user?.is_admin) {
-        sendError(res, 'Only administrators can create clients', 403);
+      // Admin and Operator can create clients
+      const isAllowed = req.user?.is_admin || [3, '3'].includes(req.user?.role_id as any);
+      if (!isAllowed) {
+        sendError(res, 'Access denied', 403);
         return;
       }
 
@@ -59,8 +61,10 @@ export class ClientController {
   static async update(req: AuthRequest, res: Response): Promise<void> {
     try {
       // Only admin can update clients
-      if (!req.user?.is_admin) {
-        sendError(res, 'Only administrators can update clients', 403);
+      // Admin and Operator can update clients
+      const isAllowed = req.user?.is_admin || [3, '3'].includes(req.user?.role_id as any);
+      if (!isAllowed) {
+        sendError(res, 'Access denied', 403);
         return;
       }
 
@@ -79,8 +83,10 @@ export class ClientController {
   static async delete(req: AuthRequest, res: Response): Promise<void> {
     try {
       // Only admin can delete clients
-      if (!req.user?.is_admin) {
-        sendError(res, 'Only administrators can delete clients', 403);
+      // Admin and Operator can delete clients
+      const isAllowed = req.user?.is_admin || [3, '3'].includes(req.user?.role_id as any);
+      if (!isAllowed) {
+        sendError(res, 'Access denied', 403);
         return;
       }
 

@@ -33,7 +33,13 @@ interface DashboardOrder {
 export class DashboardController {
   static async getActiveOrders(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const clientId = req.user && !req.user.is_admin ? req.user.client_id : null;
+      // Filter by client only if user is NOT Admin AND NOT Supervisor/Operator
+      const clientId =
+        req.user &&
+          !req.user.is_admin &&
+          ![2, 3, '2', '3'].includes(req.user.role_id as any)
+          ? req.user.client_id
+          : null;
 
       // Optimized query to get active orders with last report
       const query = `
@@ -143,7 +149,13 @@ export class DashboardController {
 
   static async getSummary(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const clientId = req.user && !req.user.is_admin ? req.user.client_id : null;
+      // Filter by client only if user is NOT Admin AND NOT Supervisor/Operator
+      const clientId =
+        req.user &&
+          !req.user.is_admin &&
+          ![2, 3, '2', '3'].includes(req.user.role_id as any)
+          ? req.user.client_id
+          : null;
       const clientCondition = clientId ? 'AND client_id = ?' : '';
       const params = clientId ? [clientId] : [];
 
