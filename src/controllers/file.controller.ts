@@ -22,7 +22,7 @@ export class FileController {
         vehicleId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -90,7 +90,7 @@ export class FileController {
         orderId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -142,7 +142,7 @@ export class FileController {
         detailId,
         {
           filename: req.file.filename,
-          path: `/${env.uploadPath}${req.file.filename}`,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
           mimetype: req.file.mimetype,
         },
         description,
@@ -175,6 +175,75 @@ export class FileController {
           message === 'Order detail not found' ? 404 :
             message === 'File not found' ? 404 :
               message === 'Access denied' ? 403 : 500;
+      sendError(res, message, statusCode);
+    }
+  }
+
+  // Agent Files
+  static async uploadAgentFile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const agentId = parseInt(req.params.id, 10);
+
+      if (!req.file) {
+        sendError(res, 'No file provided', 400);
+        return;
+      }
+
+      const { description, is_main_photo } = req.body;
+      const isMainPhoto = is_main_photo === 'true' || is_main_photo === true || is_main_photo === '1' || is_main_photo === 1;
+
+      const file = await FileService.createAgentFile(
+        agentId,
+        {
+          filename: req.file.filename,
+          path: `${env.uploadUrl}/${env.uploadPath}${req.file.filename}`,
+          mimetype: req.file.mimetype,
+        },
+        description,
+        isMainPhoto,
+        req.user
+      );
+
+      sendSuccess(res, file, 'File uploaded successfully', 201);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to upload file';
+      const statusCode =
+        message === 'Agent not found' ? 404 :
+          message === 'Access denied' ? 403 : 500;
+      sendError(res, message, statusCode);
+    }
+  }
+
+  static async deleteAgentFile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const agentId = parseInt(req.params.id, 10);
+      const fileId = parseInt(req.params.fileId, 10);
+
+      await FileService.deleteAgentFile(agentId, fileId, req.user);
+      res.status(204).send();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete file';
+      const statusCode =
+        message === 'Agent not found' ? 404 :
+          message === 'File not found' ? 404 :
+            message === 'Access denied' ? 403 : 500;
+      sendError(res, message, statusCode);
+    }
+  }
+
+  static async setMainAgentPhoto(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const agentId = parseInt(req.params.id, 10);
+      const fileId = parseInt(req.params.fileId, 10);
+
+      await FileService.setMainAgentPhoto(agentId, fileId, req.user);
+      sendSuccess(res, null, 'Main photo updated successfully');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to set main photo';
+      const statusCode =
+        message === 'Agent not found' ? 404 :
+          message === 'File not found' ? 404 :
+            message === 'Access denied' ? 403 : 500;
       sendError(res, message, statusCode);
     }
   }

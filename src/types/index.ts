@@ -374,6 +374,20 @@ export interface OrderDetailFile {
   is_deleted: boolean;
 }
 
+// AgentFile entity matching track_agent_files table
+export interface AgentFile {
+  id: number;
+  agent_id: number;
+  file_name: string;
+  description: string | null;
+  file_url: string;
+  mime_type: string | null;
+  is_main_photo: boolean;
+  created_by: number | null;
+  created_at: Date;
+  is_deleted: boolean;
+}
+
 // Dashboard item for active orders
 export interface DashboardItem {
   order: Order;

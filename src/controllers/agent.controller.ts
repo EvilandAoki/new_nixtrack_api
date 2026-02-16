@@ -29,7 +29,7 @@ export class AgentController {
   static async findById(req: AuthRequest, res: Response): Promise<void> {
     try {
       const id = parseInt(req.params.id, 10);
-      const agent = await AgentService.findById(id, req.user);
+      const agent = await AgentService.getWithFiles(id, req.user);
       sendSuccess(res, agent);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to get agent';
