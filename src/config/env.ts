@@ -19,4 +19,5 @@ export const env = {
   uploadPath: process.env.UPLOAD_PATH || 'uploads/',
   uploadUrl: process.env.UPLOAD_URL || '',
   corsOrigin: process.env.CORS_ORIGIN || '*',
+  cronStatusMinutes: parseInt(process.env.CRON_STATUS_MINUTES || '5', 10),
 };

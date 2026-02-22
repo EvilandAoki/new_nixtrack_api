@@ -45,6 +45,14 @@ export class OrderDetailModel {
       ]
     );
 
+    // After creating the detail, update the track_order's updated_at and updated_by fields for the cron
+    await pool.query(
+      `UPDATE track_order 
+       SET updated_by = ?, updated_at = NOW() 
+       WHERE id = ?`,
+      [createdBy || null, orderId]
+    );
+
     const detail = await this.findById(result.insertId);
     return detail!;
   }

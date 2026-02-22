@@ -2,9 +2,13 @@ import app from './app';
 import { env } from './config/env';
 import { testConnection } from './config/database';
 
+import crons from './crons';
+
 async function start() {
   try {
     await testConnection();
+
+    crons.start();
 
     app.listen(env.port, () => {
       console.log(`Server running on port ${env.port}`);
